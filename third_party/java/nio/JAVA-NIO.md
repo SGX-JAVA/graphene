@@ -1,3 +1,54 @@
+## Buffers
+### Buffer Basics
+#### Filling
+```
+  0   1   2   3   4   5   6   7   8   9  10
+---------------------------------------------
+| M | e | 1 | 1 |  o|  w|   |   |   |   |   |
+| 4D| 65| 6C| 6C| 6F| 77|   |   |   |   |   |
+---------------------------------------------
+                      |                  | |
+           ------------        ----------- --
+           |                   |            |
+-----    -----               -----        -----
+| X |    | 5 |               | 10|        | 10|
+-----    -----               -----        ----- 
+mark     position            limit        capacity
+```
+
+#### Flipping
+If we set the position back to 0, the channel will start fetching at the right place, but how will it know when it has reached the end of the data we inserted? This is where the limit attribute comes in. The limit indicates the end of the active buffer content. We need to set the limit to the current position, then reset the position to 0.
+
+But this flipping of buffers from fill to drain state was anticipated by the designers of the API; they provided a handy convenience method to do it for us:
+```c
+buffer.flip();
+```
+Following a flip, the buffer of Figure 2-4 would look like Figure 2-5.
+
+```
+  0   1   2   3   4   5   6   7   8   9  10
+---------------------------------------------
+| M | e | 1 | 1 |  o|  w|   |   |   |   |   |
+| 4D| 65| 6C| 6C| 6F| 77|   |   |   |   |   |
+---------------------------------------------
+  |                       |               |
+  ----------              ------          ---
+           |                   |            |
+-----    -----               -----        -----
+| X |    | 0 |               | 6 |        | 10|
+-----    -----               -----        ----- 
+mark     position            limit        capacity
+```
+
+#### Draining
+The *clear()* method resets a buffer to an empty state. It doesn't change any of the data elements of the buffer but simply sets the limit to the capacity and the position back to 0.
+
+### Summary
+
+- *Byte buffers*
+
+   While buffers can be created for any primitive data type other than boolean, byte buffers have special features not shared by the other buffer types. Only byte buffers can be used with channels (discussed in Chapter 3), and byte buffers offer views of their content in terms of the other data types.
+
 ## Selectors
 ### Selector Basics
 #### The Selector, SelectorChannel, and SelectionKey Classes
